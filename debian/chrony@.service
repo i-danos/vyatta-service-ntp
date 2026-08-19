@@ -1,0 +1,12 @@
+[Unit]
+Description=chrony service for a routing instance
+
+[Service]
+EnvironmentFile=/run/chrony/vrf/%i/%i.env
+SyslogIdentifier=chronyd: [%i]
+# -n keeps chronyd in the foreground so systemd tracks it, and -f points it
+# at the per-instance configuration rendered from "system ntp".
+ExecStart=/usr/sbin/chvrf $VRFName /usr/sbin/chronyd -n -f $CHRONY_CONF_FILE
+
+[Install]
+WantedBy=multi-user.target

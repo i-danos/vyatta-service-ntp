@@ -2,26 +2,29 @@
 
 #----- Copyright & License -----
 #
-# Copyright (C) 2017-2019 AT&T Intellectual Property.
+# Copyright (C) 2019 AT&T Intellectual Property.
 # All Rights Reserved.
-#
-# Copyright (c) 2014-2017 by Brocade Communications Systems, Inc.
-# All rights reserved.
 #
 # SPDX-License-Identifier: GPL-2.0-only
 #
 #----- Copyright & License -----
 
+# Render "system ntp keyid" into a chrony key file.
 #
-# Generate contents of /etc/ntp.keys
-#
+# chrony's key file format is
+#     <id> <TYPE> <key>
+# where TYPE is the hash function in upper case, and a plain text key is
+# written with an ASCII: prefix so that characters which would otherwise be
+# ambiguous are taken literally. ntpd's key file used lower case names and
+# a bare key, hence the translation here.
 
 use strict;
 use warnings;
 use lib "/opt/vyatta/share/perl5";
+
 use Getopt::Long;
+use JSON qw( decode_json );
 use Vyatta::Configd;
-use JSON;
 
 my ( $rtinstance, $path );
 
@@ -43,10 +46,10 @@ if ( $cfg->node_exists( $db, $path ) ) {
 
     my @keyids = @{ $subtree->{"keyid"} };
     for my $keyid (@keyids) {
-        my $dgst = $keyid->{"digest"};
+        my $dgst = uc( $keyid->{"digest"} );
         my $pass = $keyid->{"plaintext-password"};
         my $name = $keyid->{"tagnode"};
-        printf "%2d $dgst %-20s  # $dgst key\n", $name, $pass;
+        printf "%d %s ASCII:%s\n", $name, $dgst, $pass;
     }
 }
 

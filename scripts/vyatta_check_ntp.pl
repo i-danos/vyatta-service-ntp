@@ -15,9 +15,9 @@
 # Check the candidate configuration to see if ntp should be started.
 # There must be at least one IP address configured and one ntp server.
 # Interfaces that get addresses from dhcp are not considered here because
-# the dhcp client handles (re)starting ntpd on its own.
+# the dhcp client handles (re)starting chronyd on its own.
 #
-# Return 0 if ok to start ntpd; return 1 otherwise.
+# Return 0 if ok to start chronyd; return 1 otherwise.
 
 use strict;
 use warnings;

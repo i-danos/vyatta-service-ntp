@@ -1,3 +1,56 @@
+vyatta-service-ntp (0.23) unstable; urgency=medium
+
+  * Drive chrony instead of NTP Classic.
+    Debian 13 no longer ships ntp: upstream stopped releasing NTP Classic
+    and Debian dropped the package, leaving DANOS building 4.2.8p15 from a
+    local copy of dead code. chrony is Debian's default time daemon, is
+    actively maintained, and provides the time-daemon virtual package that
+    owamp-server and twamp-server already depend on.
+
+    The CLI is unchanged. "system ntp" keeps the same server list with its
+    prefer, noselect, keyid and address-family leaves, the same keyid tree,
+    the same source-interface, the same statistics switch, and the same
+    routing-instance support. The leaves map onto chrony as follows:
+
+      server <addr>        server <addr> iburst
+      prefer / noselect    same spelling on the server line
+      keyid                key <n> plus a keyfile
+      address-family       ipv4 / ipv6 on the server line
+      source-interface     bindacqaddress
+      statistics           logdir plus "log measurements statistics tracking"
+
+    Key files are rewritten in chrony's format: the digest name is upper
+    case and the shared secret carries an ASCII: prefix so it is taken
+    literally.
+
+  * Deprecate two leaves that chrony cannot honour, rather than approximate
+    them. Both are accepted and ignored, and say so in their descriptions:
+
+    - server ... preempt. ntpd could mark an association preemptable so it
+      could be dropped when the pool filled up. chrony's source selection
+      has no equivalent.
+
+    - syslog <class> type <type>. This mapped onto ntpd's logconfig, which
+      takes a class x type matrix. chrony logs through a fixed set of
+      categories and cannot express the same selection, so an approximation
+      would quietly log something other than what was asked for. Use
+      "system ntp statistics" for chrony's measurement, statistics and
+      tracking logs.
+
+  * Drop the ntpdate dependency. It was removed from Debian along with ntp,
+    and chronyd's makestep already corrects a badly wrong clock at startup.
+
+  * The generated configuration is a client-only setup, as before. chronyd
+    is a client by default and only listens when told to, so the explicit
+    "restrict default ignore noquery" that ntpd needed has no counterpart;
+    command access over the network is denied with cmddeny all.
+
+  * Rename the scripts and units to match what they now drive:
+    vyatta_update_ntp.pl and vyatta_update_ntpkeys become
+    vyatta_update_chrony.pl and vyatta_update_chronykeys, and ntpd@.service
+    becomes chrony@.service.
+
+ -- DANOS Package Maintainers <DANOS@att.com>  Wed, 19 Aug 2026 00:00:00 +0000
 vyatta-service-ntp (0.22) unstable; urgency=medium
 
   [ Nicholas Brown ]

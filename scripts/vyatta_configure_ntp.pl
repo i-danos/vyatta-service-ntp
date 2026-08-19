@@ -38,20 +38,20 @@ if ( !defined $rtinstance ) {
 }
 
 sub _setup_config () {
-    my $ntp_path = "/run/ntp/vrf/$rtinstance";
+    my $ntp_path = "/run/chrony/vrf/$rtinstance";
     make_path( "$ntp_path", { mode => 644 } );
 
     # Keys
-    `touch $ntp_path/ntp.keys`;
-    chmod 600, "$ntp_path/ntp.keys";
-    system("/opt/vyatta/sbin/vyatta_update_ntpkeys --rtinstance=$rtinstance >> $ntp_path/ntp.keys");
+    `touch $ntp_path/chrony.keys`;
+    chmod 600, "$ntp_path/chrony.keys";
+    system("/opt/vyatta/sbin/vyatta_update_chronykeys --rtinstance=$rtinstance >> $ntp_path/chrony.keys");
 
-    system("/opt/vyatta/sbin/vyatta_update_ntp.pl --rtinstance=$rtinstance < /opt/vyatta/etc/ntp.conf > $ntp_path/ntp.conf");
+    system("/opt/vyatta/sbin/vyatta_update_chrony.pl --rtinstance=$rtinstance < /opt/vyatta/etc/chrony.conf > $ntp_path/chrony.conf");
 
     # For backward compat
     if ( $rtinstance eq "default" ) {
-        unlink "/etc/ntp.conf";
-        symlink( "$ntp_path/ntp.conf", "/etc/ntp.conf" );
+        unlink "/etc/chrony/chrony.conf";
+        symlink( "$ntp_path/chrony.conf", "/etc/chrony/chrony.conf" );
     }
 }
 
@@ -60,14 +60,14 @@ sub _start_ntp() {
       if -e '/usr/bin/vmware-toolbox-cmd';
 
     if ( $rtinstance eq "default" ) {
-        system("systemctl start ntp");
+        system("systemctl start chrony");
     } else {
-        open( my $f, '>', "/run/ntp/vrf/$rtinstance/$rtinstance.env" )
+        open( my $f, '>', "/run/chrony/vrf/$rtinstance/$rtinstance.env" )
           or die("$0: Could not open systemd env for writing $!\n");
         print $f "NTPD_CONF_FILE=-c /run/ntp/vrf/$rtinstance/ntp.conf\n";
         print $f "VRFName=$rtinstance\n";
         close($f);
-        system("systemctl start ntpd\@$rtinstance.service");
+        system("systemctl start chrony\@$rtinstance.service");
     }
 }
 
@@ -75,21 +75,21 @@ sub _stop_ntp {
     my ($terminal) = @_;
     my $status;
     if ( $rtinstance eq "default" ) {
-        $status = `systemctl is-active ntp.service`;
+        $status = `systemctl is-active chrony.service`;
         if ( ( !defined $status ) || ( $status =~ /^inactive/ ) ) {
             return;
         }
-        system("systemctl stop ntp");
+        system("systemctl stop chrony");
     } else {
-        $status = `systemctl is-active ntpd\@$rtinstance.service`;
+        $status = `systemctl is-active chrony\@$rtinstance.service`;
         if ( ( !defined $status ) || ( $status =~ /^inactive/ ) ) {
             return;
         }
-        system("systemctl stop ntpd\@$rtinstance.service");
+        system("systemctl stop chrony\@$rtinstance.service");
     }
     if ( $terminal == 1 ) {
-        remove_tree("/run/ntp");
-        unlink "/etc/ntp.conf";
+        remove_tree("/run/chrony");
+        unlink "/etc/chrony/chrony.conf";
     }
 
     system('vmware-toolbox-cmd timesync enable > /dev/null 2>&1')

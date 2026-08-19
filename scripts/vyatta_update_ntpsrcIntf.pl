@@ -39,7 +39,7 @@ if ( $proto && scalar @$proto ) {
 
 $rtinstance = 'default' unless defined $rtinstance;
 
-my $ntp_path        = "/run/ntp/vrf/$rtinstance";
+my $ntp_path        = "/run/chrony/vrf/$rtinstance";
 my $ntp_srcIntfFile = "ntp.srcIntf";
 
 if ( $rtinstance eq 'default' ) {
@@ -99,14 +99,13 @@ sub srcIntf_set() {
             my ( $src_ipaddr, $src_ip6addr ) = get_src_addrs($srcIntf);
 
             if ( ( $protoset{'inet'} ) && defined($src_ipaddr) ) {
-                print "interface listen $src_ipaddr\n";
+                print "bindacqaddress $src_ipaddr\n";
                 $has_addr = 1;
             }
             if ( ( $protoset{'inet6'} ) && defined($src_ip6addr) ) {
-                print "interface listen $src_ip6addr\n";
+                print "bindacqaddress $src_ip6addr\n";
                 $has_addr = 1;
             }
-            print "interface drop all\n" unless $has_addr;
             close($fh);
         }
     } else {

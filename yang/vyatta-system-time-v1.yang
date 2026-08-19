@@ -170,8 +170,14 @@ module vyatta-system-time-v1 {
 					configd:help "Network Time Protocol (NTP) server";
 				}
 				leaf preempt {
+					status deprecated;
 					type empty;
-					configd:help "Specifies the association as preemptable rather than the default persistent";
+					description
+						"Has no effect. This marked an NTP association as
+						 preemptable, which chrony has no equivalent for --
+						 its source selection does not drop associations to
+						 make room for others.";
+					configd:help "Deprecated and ignored";
 				}
 				leaf dynamic {
 					status deprecated;
@@ -205,8 +211,17 @@ module vyatta-system-time-v1 {
 				}
 			}
 			list syslog {
-				description "Syslog Network Time Protocol (NTP) messages";
-				configd:help "Syslog Network Time Protocol (NTP) messages";
+				status deprecated;
+				description
+					"Has no effect. This selected NTP log messages by class
+					 and type, which mapped onto ntpd's logconfig directive.
+					 chrony logs through a fixed set of categories and cannot
+					 express the same selection, so the configuration is
+					 accepted but ignored rather than approximated.
+
+					 Use 'system ntp statistics' to enable chrony's
+					 measurement, statistics and tracking logs.";
+				configd:help "Deprecated and ignored";
 				key "class";
 				ordered-by "system";
 				must "not(class = 'all' and count(../syslog) > 1)" {

@@ -62,15 +62,15 @@ sub get_interface_lines {
     return;
 }
 
-# Delete a listen address from ntp.conf
-# case 1: if the address wasn't in ntp.conf then do nothing
+# Delete a listen address from chrony.conf
+# case 1: if the address wasn't in chrony.conf then do nothing
 # case 2: if the deleted address was in interface listen line:
 #       case 2.1: if interface has other valid interface address with same AF
 #          then replace address
 #       case 2.2: if no other address on the interface with same AF and
-#       it was the only interface line in ntp.conf
+#       it was the only interface line in chrony.conf
 #          - replace the line with 'interface drop all'
-#       case 2.3: if there are other address family listening in ntp.conf
+#       case 2.3: if there are other address family listening in chrony.conf
 #          - delete the address line
 sub delete_listen_addr {
     my ( $filename, $addr, $afstr ) = @_;
@@ -157,8 +157,8 @@ sub update_listen_addr {
 }
 
 sub restart_ntpd {
-    my $ntp_path = "/run/ntp/vrf/$vrf";
-    my $filename = "$ntp_path/ntp.conf";
+    my $ntp_path = "/run/chrony/vrf/$vrf";
+    my $filename = "$ntp_path/chrony.conf";
 
     my @cmd = (
         "/opt/vyatta/sbin/vyatta_update_ntpsrcIntf.pl",
@@ -201,7 +201,7 @@ sub get_vrf {
 }
 
 $vrf = get_vrf();
-exit 0 unless -e "/run/ntp/vrf/$vrf/ntp.srcIntf";
+exit 0 unless -e "/run/chrony/vrf/$vrf/ntp.srcIntf";
 
 restart_ntpd($operation);
 exit 0;

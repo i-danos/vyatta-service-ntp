@@ -3,11 +3,11 @@ tmplscripts opt/vyatta/share
 scripts/vyatta_check_ntp.pl opt/vyatta/sbin
 scripts/vyatta_configure_ntp.pl opt/vyatta/sbin
 scripts/vyatta_netplug_ntp.pl opt/vyatta/sbin
-scripts/vyatta_update_ntpkeys opt/vyatta/sbin
-scripts/vyatta_update_ntp.pl opt/vyatta/sbin
+scripts/vyatta_update_chronykeys opt/vyatta/sbin
+scripts/vyatta_update_chrony.pl opt/vyatta/sbin
 scripts/vyatta_update_ntpsrcIntf.pl opt/vyatta/sbin
-sysconf/ntp.conf opt/vyatta/etc
-sysconf/ntp.service.d/configuration-exists.conf /lib/systemd/system/ntp.service.d
+sysconf/chrony.conf opt/vyatta/etc
+sysconf/chrony.service.d/configuration-exists.conf /lib/systemd/system/chrony.service.d
 scripts/netplug/deladdr.d/ntpd /etc/netplug/deladdr.d
 scripts/netplug/newaddr.d/ntpd /etc/netplug/newaddr.d
 
